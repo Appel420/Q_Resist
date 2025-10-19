@@ -1,0 +1,112 @@
+<!-- 
+QResist Website: Quantum-resistant SHA-3-512 hasher
+To use as website: Copy this entire text, paste into Notepad, save as "qresist.html", open in Firefox.
+For PDF: Open Microsoft Word, paste this, File > Save As > PDF. To use later, copy from PDF, save as "qresist.html".
+Mermaid diagram (view in Mermaid-compatible editor like VS Code):
+graph TD
+    A[User types text] --> B[Click Hash]
+    B --> C[JavaScript SHA-3-512]
+    C --> D[Display hash]
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QResist - Apple420</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            background: linear-gradient(45deg, #00f5ff, #ff0080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+        button {
+            background: linear-gradient(45deg, #00f5ff, #0080ff);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.5);
+        }
+        #output {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QResist Apple420</h1>
+        <textarea id="input" placeholder="Type your text (e.g., I love my family)"></textarea>
+        <button onclick="hash()">Hash</button>
+        <div id="output"></div>
+    </div>
+    <script>
+        async function hash() {
+            let input = document.getElementById('input').value || 'Apple420';
+            let encoder = new TextEncoder();
+            let data = encoder.encode(input);
+            let hashBuffer = await crypto.subtle.digest('SHA-3-512', data);
+            let hashArray = Array.from(new Uint8Array(hashBuffer));
+            let hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            document.getElementById('output').textContent = hash;
+        }
+    </script>
+</body>
+</html>
