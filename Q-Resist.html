@@ -176,6 +176,17 @@
             margin-top: 0.5rem;
             word-break: break-all;
         }
+
+        .warning {
+            color: #facc15;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .copied {
+            background: rgba(74, 222, 128, 0.3) !important;
+            transition: background 0.2s;
+        }
     </style>
 </head>
 <body>
@@ -186,6 +197,7 @@
         <div class="input-group">
             <label for="input">Enter text to hash:</label>
             <textarea id="input" placeholder="Type your text here (e.g., I love my family)"></textarea>
+            <div id="warning" class="warning" style="display: none;">Input >1MB: Computation may take time.</div>
         </div>
         
         <button id="hashBtn">Generate Hash</button>
@@ -221,12 +233,12 @@
             const rate = 576; // bits (1600 - 1024)
             const capacity = 1024;
             const outputLength = 512;
+            const blockSize = rate / 8; // 72 bytes
             
             // Initialize state (5x5 matrix of 64-bit integers)
             let state = new Array(25).fill(0n);
             
             // Absorb phase
-            const blockSize = rate / 8; // 72 bytes
             const padded = pad10Star1(messageBytes, blockSize);
             
             for (let i = 0; i < padded.length; i += blockSize) {
@@ -247,20 +259,17 @@
             return result;
         }
 
-        // Helper functions for SHA3
+        // Corrected SHA3 padding (10*1 with domain separation)
         function pad10Star1(bytes, blockSize) {
-            const result = new Uint8Array(bytes);
             const len = bytes.length;
-            
-            // Calculate padding
-            const padLen = blockSize - (len % blockSize);
+            let padLen = blockSize - (len % blockSize);
+            if (padLen === 0) padLen = blockSize; // Full block for padding if exact multiple
             const padded = new Uint8Array(len + padLen);
-            padded.set(result);
-            
-            // Add padding: 1 + zeros + 1
-            padded[len] = 0x01; // First padding byte
-            padded[padded.length - 1] |= 0x80; // Last padding byte
-            
+            padded.set(bytes);
+            const padStart = len;
+            padded[padStart] |= 0x80; // First '1' bit (MSB)
+            padded[padded.length - 1] |= 0x01; // Last '1' bit (LSB)
+            padded[padded.length - 1] ^= 0x06; // Domain separation for SHA-3
             return padded;
         }
 
@@ -356,9 +365,17 @@
             const outputEl = document.getElementById('output');
             const hashBtn = document.getElementById('hashBtn');
             const copyBtn = document.getElementById('copyBtn');
+            const warningEl = document.getElementById('warning');
+
+            function updateWarning() {
+                warningEl.style.display = inputEl.value.length > 1048576 ? 'block' : 'none';
+            }
+
+            inputEl.addEventListener('input', updateWarning);
 
             hashBtn.addEventListener('click', () => {
-                const text = inputEl.value || '';
+                let text = inputEl.value.trim();
+                if (text.length === 0) text = inputEl.value; // Preserve original if only whitespace
                 try {
                     hashBtn.textContent = 'Hashing...';
                     hashBtn.classList.add('hashing');
@@ -387,8 +404,10 @@
                     navigator.clipboard.writeText(hash).then(() => {
                         const originalText = copyBtn.textContent;
                         copyBtn.textContent = 'Copied!';
+                        copyBtn.classList.add('copied');
                         setTimeout(() => {
                             copyBtn.textContent = originalText;
+                            copyBtn.classList.remove('copied');
                         }, 2000);
                     }).catch(err => {
                         console.error('Failed to copy: ', err);
@@ -411,6 +430,9 @@
 
             // Freeze console to prevent tampering
             Object.freeze(console);
+
+            // Initial warning check
+            updateWarning();
         })();
     </script>
 </body>
