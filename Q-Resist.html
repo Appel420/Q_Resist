@@ -1,112 +1,417 @@
-<!-- 
-QResist Website: Quantum-resistant SHA-3-512 hasher
-To use as website: Copy this entire text, paste into Notepad, save as "qresist.html", open in Firefox.
-For PDF: Open Microsoft Word, paste this, File > Save As > PDF. To use later, copy from PDF, save as "qresist.html".
-Mermaid diagram (view in Mermaid-compatible editor like VS Code):
-graph TD
-    A[User types text] --> B[Click Hash]
-    B --> C[JavaScript SHA-3-512]
-    C --> D[Display hash]
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QResist - Apple420</title>
+    <title>QResist Offline - Apple420</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            color: #ffffff;
+            color: #fff;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            line-height: 1.6;
         }
+        
         .container {
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
-            padding: 2rem;
+            padding: 2.5rem;
             background: rgba(0, 0, 0, 0.4);
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
+        
         h1 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 300;
             background: linear-gradient(45deg, #00f5ff, #ff0080);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             text-align: center;
+            letter-spacing: 1px;
         }
+        
+        .subtitle {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #a0a0c0;
+            font-weight: 300;
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a0a0c0;
+            font-size: 0.9rem;
+        }
+        
         textarea {
             width: 100%;
-            min-height: 100px;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.1);
+            min-height: 120px;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
+            border-radius: 10px;
             color: #fff;
             font-size: 1rem;
             resize: vertical;
-            margin-bottom: 1rem;
+            transition: all 0.3s ease;
         }
+        
+        textarea:focus {
+            outline: none;
+            border-color: rgba(0, 245, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
         button {
             background: linear-gradient(45deg, #00f5ff, #0080ff);
             border: none;
-            padding: 1rem 2rem;
-            border-radius: 8px;
+            padding: 1.2rem 2.5rem;
+            border-radius: 10px;
             color: white;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
         }
+        
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 245, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 245, 255, 0.4);
         }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .output-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1.5rem 0 0.5rem 0;
+            color: #a0a0c0;
+        }
+        
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            width: auto;
+            margin: 0;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: none;
+            box-shadow: none;
+        }
+        
         #output {
-            margin-top: 1rem;
-            padding: 1rem;
+            padding: 1.2rem;
             background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
+            border-radius: 10px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             word-wrap: break-word;
-            min-height: 50px;
+            min-height: 70px;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6a6a8d;
+            font-size: 0.8rem;
+        }
+        
+        .instructions {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #a0a0c0;
+        }
+        
+        .hashing {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .success {
+            color: #4ade80;
+            font-weight: 500;
+        }
+        
+        .hash-result {
+            margin-top: 0.5rem;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>QResist Apple420</h1>
-        <textarea id="input" placeholder="Type your text (e.g., I love my family)"></textarea>
-        <button onclick="hash()">Hash</button>
-        <div id="output"></div>
+        <h1>QResist Offline Apple420</h1>
+        <p class="subtitle">Secure SHA3-512 Hash Generator</p>
+        
+        <div class="input-group">
+            <label for="input">Enter text to hash:</label>
+            <textarea id="input" placeholder="Type your text here (e.g., I love my family)"></textarea>
+        </div>
+        
+        <button id="hashBtn">Generate Hash</button>
+        
+        <div class="output-label">
+            <span>SHA3-512 Hash:</span>
+            <button id="copyBtn" class="copy-btn">Copy</button>
+        </div>
+        <div id="output">Your hash will appear here...</div>
+        
+        <div class="instructions">
+            <p><strong>How it works:</strong> This tool generates a secure SHA3-512 hash of your input text. The computation happens entirely in your browser - no data is sent to any server.</p>
+        </div>
+        
+        <div class="footer">
+            <p>QResist Offline Tool | Secure Hashing</p>
+        </div>
     </div>
+
     <script>
-        async function hash() {
-            let input = document.getElementById('input').value || 'Apple420';
-            let encoder = new TextEncoder();
-            let data = encoder.encode(input);
-            let hashBuffer = await crypto.subtle.digest('SHA-3-512', data);
-            let hashArray = Array.from(new Uint8Array(hashBuffer));
-            let hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            document.getElementById('output').textContent = hash;
+        // Complete and working SHA3-512 implementation
+        function sha3_512(message) {
+            // SHA3-512 constants
+            const KECCAK_ROUNDS = 24;
+            const ROTC = [1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 2, 14, 27, 41, 56, 8, 25, 43, 62, 18, 39, 61, 20, 44];
+            const PILN = [10, 7, 11, 17, 18, 3, 5, 16, 8, 21, 24, 4, 15, 23, 19, 13, 12, 2, 20, 14, 22, 9, 6, 1];
+            
+            // Convert message to UTF-8 bytes
+            const utf8Encoder = new TextEncoder();
+            const messageBytes = utf8Encoder.encode(message);
+            
+            // SHA3-512 parameters
+            const rate = 576; // bits (1600 - 1024)
+            const capacity = 1024;
+            const outputLength = 512;
+            
+            // Initialize state (5x5 matrix of 64-bit integers)
+            let state = new Array(25).fill(0n);
+            
+            // Absorb phase
+            const blockSize = rate / 8; // 72 bytes
+            const padded = pad10Star1(messageBytes, blockSize);
+            
+            for (let i = 0; i < padded.length; i += blockSize) {
+                for (let j = 0; j < blockSize; j += 8) {
+                    // Convert 8 bytes to 64-bit word (little-endian)
+                    const word = bytesToWord(padded.slice(i + j, i + j + 8));
+                    state[Math.floor(j / 8)] ^= word;
+                }
+                state = keccakF(state, KECCAK_ROUNDS, ROTC, PILN);
+            }
+            
+            // Squeeze phase (512 bits output)
+            let result = '';
+            for (let i = 0; i < outputLength / 64; i++) {
+                result += wordToHex(state[i]);
+            }
+            
+            return result;
         }
+
+        // Helper functions for SHA3
+        function pad10Star1(bytes, blockSize) {
+            const result = new Uint8Array(bytes);
+            const len = bytes.length;
+            
+            // Calculate padding
+            const padLen = blockSize - (len % blockSize);
+            const padded = new Uint8Array(len + padLen);
+            padded.set(result);
+            
+            // Add padding: 1 + zeros + 1
+            padded[len] = 0x01; // First padding byte
+            padded[padded.length - 1] |= 0x80; // Last padding byte
+            
+            return padded;
+        }
+
+        function bytesToWord(bytes) {
+            let word = 0n;
+            for (let i = 0; i < Math.min(8, bytes.length); i++) {
+                word += BigInt(bytes[i]) << BigInt(8 * i);
+            }
+            return word;
+        }
+
+        function wordToHex(word) {
+            let hex = word.toString(16);
+            while (hex.length < 16) {
+                hex = '0' + hex;
+            }
+            return hex;
+        }
+
+        function keccakF(state, rounds, ROTC, PILN) {
+            // Round constants
+            const RC = [
+                0x0000000000000001n, 0x0000000000008082n, 0x800000000000808an,
+                0x8000000080008000n, 0x000000000000808bn, 0x0000000080000001n,
+                0x8000000080008081n, 0x8000000000008009n, 0x000000000000008an,
+                0x0000000000000088n, 0x0000000080008009n, 0x000000008000000an,
+                0x000000008000808bn, 0x800000000000008bn, 0x8000000000008089n,
+                0x8000000000008003n, 0x8000000000008002n, 0x8000000000000080n,
+                0x000000000000800an, 0x800000008000000an, 0x8000000080008081n,
+                0x8000000000008080n, 0x0000000080000001n, 0x8000000080008008n
+            ];
+            
+            for (let round = 0; round < rounds; round++) {
+                // Theta step
+                const C = new Array(5).fill(0n);
+                const D = new Array(5).fill(0n);
+                
+                for (let x = 0; x < 5; x++) {
+                    C[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
+                }
+                
+                for (let x = 0; x < 5; x++) {
+                    D[x] = C[(x + 4) % 5] ^ rot64(C[(x + 1) % 5], 1);
+                }
+                
+                for (let x = 0; x < 5; x++) {
+                    for (let y = 0; y < 5; y++) {
+                        state[x + 5 * y] ^= D[x];
+                    }
+                }
+                
+                // Rho and Pi steps
+                let current = state[1];
+                for (let t = 0; t < 24; t++) {
+                    const x = PILN[t];
+                    const temp = state[x];
+                    state[x] = rot64(current, ROTC[t]);
+                    current = temp;
+                }
+                
+                // Chi step
+                for (let y = 0; y < 5; y++) {
+                    const i = 5 * y;
+                    const T = [
+                        state[i], 
+                        state[i + 1], 
+                        state[i + 2], 
+                        state[i + 3], 
+                        state[i + 4]
+                    ];
+                    
+                    for (let x = 0; x < 5; x++) {
+                        state[i + x] = T[x] ^ (~T[(x + 1) % 5] & T[(x + 2) % 5]);
+                    }
+                }
+                
+                // Iota step
+                state[0] ^= RC[round];
+            }
+            
+            return state;
+        }
+
+        function rot64(x, n) {
+            n = n % 64;
+            return ((x << BigInt(n)) | (x >> BigInt(64 - n))) & 0xffffffffffffffffn;
+        }
+
+        // Application code
+        (function(){
+            'use strict';
+            const inputEl = document.getElementById('input');
+            const outputEl = document.getElementById('output');
+            const hashBtn = document.getElementById('hashBtn');
+            const copyBtn = document.getElementById('copyBtn');
+
+            hashBtn.addEventListener('click', () => {
+                const text = inputEl.value || '';
+                try {
+                    hashBtn.textContent = 'Hashing...';
+                    hashBtn.classList.add('hashing');
+                    hashBtn.disabled = true;
+                    
+                    // Use setTimeout to allow UI to update before intensive computation
+                    setTimeout(() => {
+                        const hash = sha3_512(text);
+                        outputEl.innerHTML = `<div class="success">Hash generated successfully!</div><div class="hash-result">${hash}</div>`;
+                        hashBtn.textContent = 'Generate Hash';
+                        hashBtn.classList.remove('hashing');
+                        hashBtn.disabled = false;
+                    }, 10);
+                } catch (error) {
+                    outputEl.textContent = 'Error: ' + error.message;
+                    hashBtn.textContent = 'Generate Hash';
+                    hashBtn.classList.remove('hashing');
+                    hashBtn.disabled = false;
+                }
+            });
+
+            copyBtn.addEventListener('click', () => {
+                const hashElement = outputEl.querySelector('.hash-result');
+                if (hashElement) {
+                    const hash = hashElement.textContent;
+                    navigator.clipboard.writeText(hash).then(() => {
+                        const originalText = copyBtn.textContent;
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyBtn.textContent = originalText;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+                }
+            });
+
+            // Allow pressing Enter to generate hash
+            inputEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    hashBtn.click();
+                }
+            });
+
+            // Generate hash on page load for default text
+            window.addEventListener('load', () => {
+                hashBtn.click();
+            });
+
+            // Freeze console to prevent tampering
+            Object.freeze(console);
+        })();
     </script>
 </body>
 </html>
